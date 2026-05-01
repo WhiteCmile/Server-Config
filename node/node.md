@@ -10,9 +10,10 @@ tar -xf node-v22.11.0-linux-x64.tar.xz
 mv node-v22.11.0-linux-x64 node
 ```
 
-会得到一个名为 `node` 的文件夹，进入该文件夹，然后运行
+会得到一个名为 `node` 的文件夹，然后运行
 
 ```
+cd node
 echo "export PATH=\"$(pwd)/bin:\$PATH\"" >> ~/.bashrc
 source ~/.bashrc
 ```

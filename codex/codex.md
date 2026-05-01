@@ -7,7 +7,7 @@
 ```
 npm install -g @openai/codex --prefix .../apps/codex
 echo "export PATH=\".../apps/codex/bin:\$PATH\"" >> ~/.bashrc
-sourcce ~/.bashrc
+source ~/.bashrc
 ```
 
 用

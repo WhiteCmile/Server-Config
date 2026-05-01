@@ -46,6 +46,11 @@ source ~/.zshrc
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$ZSH_HOME/powerlevel10k"
 ```
 
+在 `~/.zshrc` 中加上
+```
+source $ZSH_HOME/powerlevel10k/powerlevel10k.zsh-theme
+```
+
 然后重新进入 zsh，并执行向导：
 
 ```
