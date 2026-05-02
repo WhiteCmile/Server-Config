@@ -1,17 +1,25 @@
 # VPN 配置
 
-在 `https://github.com/Kuingsmile/clash-core/releases` 下载对应的 clash 二进制文件并解压命名为 `clash`
+在 `https://github.com/mihomo-party-org/clash-party/releases` 下载对应的 mihomo .deb 文件
 
-将本仓库的 Country.mmdb 复制一份
-
-从代理网站拷贝 `config.yaml`，命令形如
+使用
 ```
-wget -O config.yaml https://s.suying666.info/link/***?clash=1&log-level=info
+dpkg-deb -x clash-party-*.deb $CLASH_PATH
+```
+其中 `$CLASH_PATH` 是你想安装 `clash` 的文件夹
+
+然后执行
+```
+cd $CLASH_PATH
+ln -s ./opt/clash-party/resources/sidecar/mihomo clash
 ```
 
-然后修改 `config.yaml` 中的
+将本仓库的 Country.mmdb, config.yaml, GeoSite.dat 复制一份到 `$CLASH_PATH` 目录
+
+然后修改 `config.yaml` 中的 `mixed-port` 和 `external-controller` 为：
 ```
 mixed-port: 38478
+external-controller: '127.0.0.1:10086'
 ```
 
 文件目录应该形如
@@ -20,6 +28,7 @@ clash
     - clash
     - Country.mmdb
     - config.yaml
+    - GeoSite.dat
 ```
 
 然后 `./clash -d .` 
