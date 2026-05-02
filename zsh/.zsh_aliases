@@ -1,0 +1,8 @@
+# Server-Config managed aliases
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Codex with isolated home example:
+# alias codex-ztl='CODEX_HOME=$APPS_HOME/codex/.codex codex'

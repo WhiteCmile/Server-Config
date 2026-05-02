@@ -1,42 +1,79 @@
 # VPN 配置
 
-在 `https://github.com/mihomo-party-org/clash-party/releases` 下载对应的 mihomo .deb 文件
+> 使用 mihomo（来自 clash-party 的 sidecar）在服务器上启用本地代理
 
-使用
-```
-dpkg-deb -x clash-party-*.deb $CLASH_PATH
-```
-其中 `$CLASH_PATH` 是你想安装 `clash` 的文件夹
+## 1) 下载并解压
 
-然后执行
-```
-cd $CLASH_PATH
-ln -s ./opt/clash-party/resources/sidecar/mihomo clash
+先在 `https://github.com/mihomo-party-org/clash-party/releases` 下载适配系统架构的 `.deb` 文件，然后解压到目标目录：
+
+```bash
+CLASH_PATH=/path/to/clash
+mkdir -p "$CLASH_PATH"
+dpkg-deb -x clash-party-*.deb "$CLASH_PATH"
 ```
 
-将本仓库的 Country.mmdb, config.yaml, GeoSite.dat 复制一份到 `$CLASH_PATH` 目录
+## 2) 创建可执行入口
 
-然后修改 `config.yaml` 中的 `mixed-port` 和 `external-controller` 为：
+```bash
+cd "$CLASH_PATH"
+ln -sf ./opt/clash-party/resources/sidecar/mihomo ./clash
 ```
+
+## 3) 复制配置文件
+
+在仓库根目录执行，将本仓库 `vpn/` 目录下文件复制到 `$CLASH_PATH`：
+
+```bash
+cp vpn/{Country.mmdb,GeoSite.dat,config.yaml,set_ztl_vpn.sh} "$CLASH_PATH"/
+```
+
+复制后应包含以下文件：
+
+- `Country.mmdb`
+- `GeoSite.dat`
+- `config.yaml`
+- `set_ztl_vpn.sh`（供终端启停代理）
+
+目录结构应类似：
+
+```text
+$CLASH_PATH/
+  clash
+  Country.mmdb
+  GeoSite.dat
+  config.yaml
+  set_ztl_vpn.sh
+```
+
+## 4) 调整端口
+
+编辑 `config.yaml`，至少确认以下字段：
+
+```yaml
 mixed-port: 38478
 external-controller: '127.0.0.1:10086'
 ```
 
-文件目录应该形如
-```
-clash
-    - clash
-    - Country.mmdb
-    - config.yaml
-    - GeoSite.dat
+如果端口冲突，请统一改成你自己的端口，并同步修改 `set_ztl_vpn.sh`。
+
+脚本中的代理变量采用带协议前缀的形式（例如 `http://127.0.0.1:38478`），兼容性更好。
+
+## 5) 启动 mihomo
+
+```bash
+cd "$CLASH_PATH"
+./clash -d .
 ```
 
-然后 `./clash -d .` 
+## 6) 在终端启用代理
 
-在需要用梯子的终端中复制一份本文件夹下的 `set_ztl_vpn.sh`
-然后
-```
-source set_ztl_vpn.sh
+```bash
+source "$CLASH_PATH/set_ztl_vpn.sh"
 proxy
 ```
-即可使用代理
+
+关闭代理：
+
+```bash
+noproxy
+```

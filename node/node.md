@@ -1,27 +1,37 @@
 # Node 配置
 
-> 如何在服务器上下载 node
+> 在服务器上安装 Node.js 到自定义目录（不依赖系统包管理器）
 
-先创建好对应的文件夹，在对应文件夹中执行：
+## 前置条件
 
+- 已安装 `curl`、`tar`
+- 有一个用于存放工具的目录（如 `APPS_HOME`）
+
+## 安装步骤
+
+```bash
+APPS_HOME=/path/to/apps
+NODE_VERSION=v22.22.0
+cd "$APPS_HOME"
+
+curl -LO "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz"
+tar -xf "node-${NODE_VERSION}-linux-x64.tar.xz"
+mv "node-${NODE_VERSION}-linux-x64" node
 ```
-curl -LO https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-x64.tar.xz
-tar -xf node-v22.11.0-linux-x64.tar.xz
-mv node-v22.11.0-linux-x64 node
-```
 
-会得到一个名为 `node` 的文件夹，然后运行
+## 配置 PATH
 
-```
-cd node
-echo "export PATH=\"$(pwd)/bin:\$PATH\"" >> ~/.bashrc
+```bash
+echo "export PATH=\"$APPS_HOME/node/bin:\$PATH\"" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-然后输入
+## 验证
 
-```
+```bash
 node -v
+npm -v
+npx -v
 ```
 
-确定是否安装成功
+如果以上命令都能输出版本号，说明安装成功。
