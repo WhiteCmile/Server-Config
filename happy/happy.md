@@ -10,6 +10,8 @@
 2. 若 `~/.happy/settings.json` 不存在，写入 `serverUrl`（默认 `https://47.74.47.171`，可用 `HAPPY_SERVER_URL` 覆盖）
 3. 让 bash/zsh 加载 [happy.sh](./happy.sh)，默认把 `claude` / `codex` 交给 Happy 启动
 
+配对和 daemon 需要人工操作，见下方「新机器接入」。
+
 ## 手动安装
 
 ```bash
@@ -24,13 +26,47 @@ echo '{"schemaVersion":2,"onboardingCompleted":false,"serverUrl":"https://47.74.
 echo '[ -f "/path/to/Server-Config/happy/happy.sh" ] && . "/path/to/Server-Config/happy/happy.sh"' >> ~/.bashrc
 ```
 
-## 首次配对（每台机器一次）
+## 新机器接入（每台机器一次）
 
-1. 手机安装 Happy App，登录前在设置里把 Relay Server URL 改为 `https://47.74.47.171`
-2. 机器上执行 `happy auth login`，用 App 扫二维码
-3. 可选：`happy daemon start`，之后可以从手机上直接在这台机器新开会话
+前提：机器上已经装好 `claude` / `codex`；需要代理才能上网的机器，下面每一步之前先执行 `proxy`。
 
-配对完成后会生成 `~/.happy/access.key`，wrapper 才会生效。
+1. 跑 bootstrap（或者已经有仓库的机器 `git pull` 后再跑一遍）：
+   ```bash
+   cd ~/Server-Config && APPS_HOME=$HOME/apps bash bootstrap/setup_env.sh
+   ```
+2. **开一个新终端**（旧终端没有加载 `happy.sh`，代理修复也不会生效）
+3. 配对：
+   ```bash
+   happy auth login
+   ```
+   手机打开 Happy App → 扫终端里的二维码
+4. 启动 daemon（让手机能看到这台机器、远程新开会话）：
+   ```bash
+   happy daemon start
+   happy daemon status    # 应显示 ✓ Daemon is running
+   ```
+   机器重启后 daemon 不会自动起来，需要再执行一次
+5. 之后直接 `claude` / `codex` 即可，手机上能看到会话
+
+配对后会生成 `~/.happy/access.key`，有它 wrapper 才会生效；没配对的机器上 `claude` / `codex` 照常走原生命令。
+
+### 手机 App（只需设置一次）
+
+- App Store 搜 **Happy Coder**（或从 [GitHub](https://github.com/slopus/happy) README 的 App Store 按钮进入）
+- **登录前**：欢迎页右上角齿轮 → Server URL 填 `https://47.74.47.171` → 确认
+- 已经用官方服务器登录过的话：设置里退出登录（Log out / Start over），回到欢迎页再改
+
+### 把已在运行的会话接到手机上
+
+已经用原生命令启动的进程 Happy 接管不了，需要退出后在**同一目录**用 Happy 恢复（对话内容不会丢）：
+
+```bash
+claude -c                     # 恢复这个目录最近一次对话
+claude --resume [session-id]  # 指定或从列表选择
+codex --resume <thread-id>    # thread-id 见 ~/.codex/sessions/ 下文件名末尾的 UUID
+```
+
+注意 `codex resume`（子命令形式）不会走 Happy。
 
 ## 默认用 Happy 启动
 
@@ -58,6 +94,17 @@ echo '[ -f "/path/to/Server-Config/happy/happy.sh" ] && . "/path/to/Server-Confi
 - Happy 的实时连接（socket.io / `ws`）不认上面的代理设置，会直连然后超时，手机上显示 "Happy is not running on your computer"。`happy.sh` 里的 `happy()` 会通过 `NODE_OPTIONS=--require` 预加载 [ws-proxy.cjs](./ws-proxy.cjs)，把 WebSocket 也走代理；没有设置代理时它什么都不做
 - 修改代理后需要重启 daemon：`happy daemon stop && happy daemon start`
 
+## 排查
+
+| 现象 | 原因 / 处理 |
+| --- | --- |
+| `Happy server unreachable ... 500` | 中转服务器出错，看 `sudo journalctl -u happy-server`（见 [server/server.md](./server/server.md)） |
+| `Failed to start daemon` | `NO_PROXY` 没包含 `127.0.0.1`，在新终端（已加载 `happy.sh`）里重试 |
+| 手机显示 "Happy is not running on your computer" | daemon 没启动，或实时连接没走代理：在新终端里 `happy daemon stop && happy daemon start`，日志里应有 `Connected to server` |
+| 手机看不到某个会话 | 该会话是原生命令启动的，按上面的方法用 Happy 恢复 |
+
+日志在 `~/.happy/logs/`，daemon 日志文件名以 `-daemon.log` 结尾。
+
 ## 常用命令
 
 ```bash
@@ -69,4 +116,4 @@ happy doctor          # 诊断
 
 ## 中转服务器
 
-`happy-server-self-host` 部署在 `47.74.47.171`：systemd 服务 `happy-server`（监听 `127.0.0.1:3005`，数据在 `/var/lib/happy`，环境变量在 `/etc/happy/happy.env`），由 Caddy 用 Let's Encrypt IP 证书反代到 443。
+`happy-server-self-host` 部署在 `47.74.47.171`，部署方式、配置模板和已知问题见 [server/server.md](./server/server.md)。

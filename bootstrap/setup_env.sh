@@ -220,6 +220,10 @@ happy --version
 cat ~/.happy/settings.json
 type codex claude
 
+# Happy pairing (manual, in a NEW terminal; run `proxy` first if needed):
+happy auth login
+happy daemon start
+
 VERIFY_EOF
 }
 

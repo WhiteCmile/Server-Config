@@ -44,7 +44,8 @@ happy() {
 
 _happy_should_wrap() {
   [ "${HAPPY_WRAP:-1}" != "0" ] || return 1
-  command -v happy >/dev/null 2>&1 || return 1
+  # `happy` is also a function above; look for the real binary.
+  (unset -f happy; command -v happy) >/dev/null 2>&1 || return 1
   [ -f "$HOME/.happy/access.key" ] || return 1
   [ -t 0 ] && [ -t 1 ]
 }

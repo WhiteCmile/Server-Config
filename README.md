@@ -41,6 +41,7 @@
 - [VPN 配置](./vpn/vpn.md)
 - [Zsh 配置](./zsh/zsh.md)
 - [Happy 配置](./happy/happy.md)
+- [Happy 中转服务器部署](./happy/server/server.md)
 - [New Machine (Codex-First)](./codex/new-machine-codex.md)
 
 ## 约定

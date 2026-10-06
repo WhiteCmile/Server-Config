@@ -1,0 +1,24 @@
+[Unit]
+Description=Happy relay server (self-hosted)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=happy
+Group=happy
+EnvironmentFile=/etc/happy/happy.env
+WorkingDirectory=/opt/happy-server/node_modules/happy-server-self-host
+ExecStartPre=/usr/bin/node /opt/happy-server/node_modules/happy-server-self-host/dist/standalone.mjs migrate
+ExecStart=/usr/bin/node --max-old-space-size=320 /opt/happy-server/node_modules/happy-server-self-host/dist/standalone.mjs serve
+Restart=on-failure
+RestartSec=5
+MemoryHigh=450M
+MemoryMax=550M
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/happy
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

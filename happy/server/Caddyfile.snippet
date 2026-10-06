@@ -1,0 +1,15 @@
+# Global options block: IP clients send no SNI, so give Caddy a default.
+{
+	default_sni 47.74.47.171
+}
+
+# Let's Encrypt IP certificate (shortlived profile).
+47.74.47.171 {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3005
+}

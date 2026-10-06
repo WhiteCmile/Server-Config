@@ -11,6 +11,7 @@
 3. APPS_HOME 使用 /path/to/apps（如果我没指定就默认用 $HOME/apps）。
 4. 执行完成后，运行文档中的验证命令并汇报结果。
 5. 如果某一步需要 sudo 权限，先继续执行不需要 sudo 的部分，并明确告诉我需要我补执行的命令。
+6. Happy 配对需要我用手机扫码，最后提醒我按 happy/happy.md「新机器接入」开新终端执行 happy auth login 和 happy daemon start。
 ```
 
 ## 2) Codex 实际会执行的命令
