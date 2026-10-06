@@ -16,6 +16,12 @@ esac
 
 # Node only honors http(s)_proxy with this set (Node >= 22.21 / 24).
 export NODE_USE_ENV_PROXY=1
+# ...but Happy's daemon health check hits 127.0.0.1, which must not be proxied.
+case ",${NO_PROXY:-}," in
+  *,127.0.0.1,*) ;;
+  *) export NO_PROXY="127.0.0.1,localhost${NO_PROXY:+,$NO_PROXY}" ;;
+esac
+export no_proxy="$NO_PROXY"
 
 _happy_should_wrap() {
   [ "${HAPPY_WRAP:-1}" != "0" ] || return 1
