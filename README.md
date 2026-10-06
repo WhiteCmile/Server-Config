@@ -1,6 +1,6 @@
 # Server Config
 
-这个仓库用于集中管理常用服务器环境配置，包括 `node`、`codex`、`ssh`、`tmux`、`vim`、`vpn`、`zsh`。
+这个仓库用于集中管理常用服务器环境配置，包括 `node`、`codex`、`ssh`、`tmux`、`vim`、`vpn`、`zsh`、`happy`。
 
 ## Codex-First 快速开始
 
@@ -19,6 +19,7 @@
 - `vim/`: `.vimrc` 配置文件与使用说明
 - `vpn/`: 本地代理（mihomo/clash）配置与脚本
 - `zsh/`: zsh 配置放置规范说明
+- `happy/`: Happy 手机远程控制 Claude/Codex，默认用 `happy claude` / `happy codex` 启动
 - `bootstrap/`: 一键初始化脚本（给 Codex 或人工执行）
 
 ## 推荐初始化顺序
@@ -28,6 +29,7 @@
 3. 安装 Codex
 4. 按需配置 `tmux`/`vim`/`zsh`
 5. 按需配置 VPN 代理
+6. 配置 Happy 并执行 `happy auth login` 与手机配对
 
 ## 文档入口
 
@@ -38,6 +40,7 @@
 - [Vim 配置](./vim/vim.md)
 - [VPN 配置](./vpn/vpn.md)
 - [Zsh 配置](./zsh/zsh.md)
+- [Happy 配置](./happy/happy.md)
 - [New Machine (Codex-First)](./codex/new-machine-codex.md)
 
 ## 约定

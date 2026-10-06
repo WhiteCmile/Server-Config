@@ -27,6 +27,7 @@ APPS_HOME=$HOME/apps bash bootstrap/setup_env.sh
 INSTALL_BASE_PACKAGES=0 APPS_HOME=$HOME/apps bash bootstrap/setup_env.sh
 SET_DEFAULT_SHELL_ZSH=1 APPS_HOME=$HOME/apps bash bootstrap/setup_env.sh
 NODE_VERSION=v22.22.0 APPS_HOME=$HOME/apps bash bootstrap/setup_env.sh
+SETUP_HAPPY=0 APPS_HOME=$HOME/apps bash bootstrap/setup_env.sh
 ```
 
 变量说明：
@@ -39,3 +40,5 @@ NODE_VERSION=v22.22.0 APPS_HOME=$HOME/apps bash bootstrap/setup_env.sh
 - `SETUP_ZSH`: `1/0`，是否链接 zsh 配置
 - `SET_DEFAULT_SHELL_ZSH`: `1/0`，是否执行 `chsh`
 - `NODE_VERSION`: Node 版本（默认 `v22.22.0`）
+- `SETUP_HAPPY`: `1/0`，是否安装 Happy 并默认用 `happy claude/codex` 启动（见 [happy.md](../happy/happy.md)）
+- `HAPPY_SERVER_URL`: Happy 中转服务器（默认 `https://47.74.47.171`）

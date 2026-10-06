@@ -15,6 +15,8 @@ SETUP_TMUX="${SETUP_TMUX:-1}"
 SETUP_VIM="${SETUP_VIM:-1}"
 SETUP_ZSH="${SETUP_ZSH:-1}"
 SET_DEFAULT_SHELL_ZSH="${SET_DEFAULT_SHELL_ZSH:-0}"
+SETUP_HAPPY="${SETUP_HAPPY:-1}"
+HAPPY_SERVER_URL="${HAPPY_SERVER_URL:-https://47.74.47.171}"
 
 log() {
   printf '[setup] %s\n' "$*"
@@ -154,6 +156,53 @@ setup_dotfiles() {
   fi
 }
 
+setup_happy() {
+  if [[ "$SETUP_HAPPY" != "1" ]]; then
+    log "skip happy setup"
+    return
+  fi
+
+  local npm_bin="npm"
+  if [[ -x "$APPS_HOME/node/bin/npm" ]]; then
+    npm_bin="$APPS_HOME/node/bin/npm"
+    export PATH="$APPS_HOME/node/bin:$PATH"
+  fi
+  if ! has_cmd "$npm_bin"; then
+    log "npm not found; skip happy setup"
+    return
+  fi
+
+  local happy_dir="$APPS_HOME/happy"
+  if [[ -x "$happy_dir/bin/happy" ]]; then
+    log "happy already exists at $happy_dir, skip install"
+  else
+    log "install happy cli to $happy_dir"
+    if ! "$npm_bin" install -g happy --prefix "$happy_dir"; then
+      log "happy install failed; continue without happy"
+      return
+    fi
+  fi
+
+  # npm >= 11 may skip install scripts; unpack bundled tools (idempotent).
+  local unpack="$happy_dir/lib/node_modules/happy/scripts/unpack-tools.cjs"
+  if [[ -f "$unpack" ]]; then
+    node "$unpack" >/dev/null || log "happy unpack-tools failed"
+  fi
+
+  mkdir -p "$HOME/.happy"
+  if [[ -f "$HOME/.happy/settings.json" ]]; then
+    log "keep existing ~/.happy/settings.json"
+  else
+    printf '{"schemaVersion":2,"onboardingCompleted":false,"serverUrl":"%s"}\n' \
+      "$HAPPY_SERVER_URL" > "$HOME/.happy/settings.json"
+    log "happy server url set to $HAPPY_SERVER_URL"
+  fi
+
+  # zsh sources happy.sh via the managed .zshrc; bash needs it explicitly.
+  ensure_line_in_file "[ -f \"$REPO_ROOT/happy/happy.sh\" ] && . \"$REPO_ROOT/happy/happy.sh\"" "$HOME/.bashrc"
+  log "happy wrapper enabled; run 'happy auth login' once to pair with the phone app"
+}
+
 print_verification() {
   log "verification commands:"
   cat <<'VERIFY_EOF'
@@ -167,6 +216,10 @@ tmux -V
 vim --version | head -n 1
 zsh --version
 
+happy --version
+cat ~/.happy/settings.json
+type codex claude
+
 VERIFY_EOF
 }
 
@@ -177,6 +230,7 @@ main() {
   setup_node
   setup_ssh_alias
   setup_dotfiles
+  setup_happy
   print_verification
   log "done"
 }

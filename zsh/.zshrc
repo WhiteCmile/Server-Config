@@ -12,3 +12,10 @@ fi
 
 # Keep Node path in shell startup for non-login shells.
 export PATH="$APPS_HOME/node/bin:$PATH"
+
+# Route interactive claude/codex through Happy (see happy/happy.md).
+_server_config_root="${${(%):-%x}:A:h:h}"
+if [[ -f "$_server_config_root/happy/happy.sh" ]]; then
+  source "$_server_config_root/happy/happy.sh"
+fi
+unset _server_config_root
