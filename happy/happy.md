@@ -52,7 +52,11 @@ echo '[ -f "/path/to/Server-Config/happy/happy.sh" ] && . "/path/to/Server-Confi
 
 ## 代理
 
-`happy.sh` 会设置 `NODE_USE_ENV_PROXY=1`，让 Node（需要 >= 22.21 或 24）使用 `http_proxy/https_proxy`。机器需要代理才能访问中转服务器时，先执行 `proxy`（见 `zsh/.zsh_functions`）再启动。
+需要代理才能访问中转服务器的机器（先执行 `proxy`，见 `zsh/.zsh_functions`）：
+
+- `happy.sh` 设置 `NODE_USE_ENV_PROXY=1`，让 Node（>= 22.21 / 24）的 HTTP 请求走 `http_proxy/https_proxy`；同时把 `127.0.0.1,localhost` 加进 `NO_PROXY`，否则 daemon 自检会失败（"Failed to start daemon"）
+- Happy 的实时连接（socket.io / `ws`）不认上面的代理设置，会直连然后超时，手机上显示 "Happy is not running on your computer"。`happy.sh` 里的 `happy()` 会通过 `NODE_OPTIONS=--require` 预加载 [ws-proxy.cjs](./ws-proxy.cjs)，把 WebSocket 也走代理；没有设置代理时它什么都不做
+- 修改代理后需要重启 daemon：`happy daemon stop && happy daemon start`
 
 ## 常用命令
 
