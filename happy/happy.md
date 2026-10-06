@@ -40,12 +40,15 @@ echo '[ -f "/path/to/Server-Config/happy/happy.sh" ] && . "/path/to/Server-Confi
    happy auth login
    ```
    手机打开 Happy App → 扫终端里的二维码
-4. 启动 daemon（让手机能看到这台机器、远程新开会话）：
+4. 把 daemon 装成开机自启的 systemd 用户服务（让手机能看到这台机器、远程新开会话）：
    ```bash
-   happy daemon start
-   happy daemon status    # 应显示 ✓ Daemon is running
+   bash ~/Server-Config/happy/install-daemon-service.sh
+   systemctl --user status happy-daemon    # active (running)
    ```
-   机器重启后 daemon 不会自动起来，需要再执行一次
+   - 在平时用的终端里执行：会记下当前的 `http_proxy/https_proxy`（存到 `~/.config/happy-daemon.env`），daemon 通过你的登录 shell（`bash -ic` / `zsh -ic`）启动，所以 PATH、模型 API 等环境变量和终端里一致
+   - 挂了会自动重启；重启机器后自动起来需要 linger，脚本检测到没开时会提示执行 `sudo loginctl enable-linger $USER`
+   - 改了代理后重新执行一次脚本；卸载：`bash ~/Server-Config/happy/install-daemon-service.sh --uninstall`
+   - 没有 systemd 的机器用 `happy daemon start` 手动启动（重启后需要再执行）
 5. 之后直接 `claude` / `codex` 即可，手机上能看到会话
 
 配对后会生成 `~/.happy/access.key`，有它 wrapper 才会生效；没配对的机器上 `claude` / `codex` 照常走原生命令。
@@ -92,7 +95,7 @@ codex --resume <thread-id>    # thread-id 见 ~/.codex/sessions/ 下文件名末
 
 - `happy.sh` 设置 `NODE_USE_ENV_PROXY=1`，让 Node（>= 22.21 / 24）的 HTTP 请求走 `http_proxy/https_proxy`；同时把 `127.0.0.1,localhost` 加进 `NO_PROXY`，否则 daemon 自检会失败（"Failed to start daemon"）
 - Happy 的实时连接（socket.io / `ws`）不认上面的代理设置，会直连然后超时，手机上显示 "Happy is not running on your computer"。`happy.sh` 里的 `happy()` 会通过 `NODE_OPTIONS=--require` 预加载 [ws-proxy.cjs](./ws-proxy.cjs)，把 WebSocket 也走代理；没有设置代理时它什么都不做
-- 修改代理后需要重启 daemon：`happy daemon stop && happy daemon start`
+- 修改代理后需要重新执行 `install-daemon-service.sh`（手动启动的话 `happy daemon stop && happy daemon start`）
 
 ## 排查
 
@@ -100,7 +103,8 @@ codex --resume <thread-id>    # thread-id 见 ~/.codex/sessions/ 下文件名末
 | --- | --- |
 | `Happy server unreachable ... 500` | 中转服务器出错，看 `sudo journalctl -u happy-server`（见 [server/server.md](./server/server.md)） |
 | `Failed to start daemon` | `NO_PROXY` 没包含 `127.0.0.1`，在新终端（已加载 `happy.sh`）里重试 |
-| 手机显示 "Happy is not running on your computer" | daemon 没启动，或实时连接没走代理：在新终端里 `happy daemon stop && happy daemon start`，日志里应有 `Connected to server` |
+| 手机显示 "Happy is not running on your computer" | daemon 没启动，或实时连接没走代理：`systemctl --user restart happy-daemon`（手动启动的话在新终端里 `happy daemon stop && happy daemon start`），日志里应有 `Connected to server` |
+| daemon 服务起不来 | `journalctl --user -u happy-daemon -n 50`；开头的 `no job control in this shell` 是无害警告 |
 | 手机看不到某个会话 | 该会话是原生命令启动的，按上面的方法用 Happy 恢复 |
 
 日志在 `~/.happy/logs/`，daemon 日志文件名以 `-daemon.log` 结尾。
@@ -109,7 +113,8 @@ codex --resume <thread-id>    # thread-id 见 ~/.codex/sessions/ 下文件名末
 
 ```bash
 happy auth login      # 配对
-happy daemon start    # 允许手机远程新开会话
+systemctl --user status happy-daemon   # daemon 服务状态
+journalctl --user -u happy-daemon -f   # daemon 服务日志
 happy daemon status
 happy doctor          # 诊断
 ```

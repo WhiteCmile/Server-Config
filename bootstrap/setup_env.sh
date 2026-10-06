@@ -222,7 +222,7 @@ type codex claude
 
 # Happy pairing (manual, in a NEW terminal; run `proxy` first if needed):
 happy auth login
-happy daemon start
+bash ~/Server-Config/happy/install-daemon-service.sh
 
 VERIFY_EOF
 }
